@@ -8,7 +8,6 @@
 
 import Welcome from './Welcome.vue'
 
-
 export default {
   name: 'login',
   components: {Welcome},

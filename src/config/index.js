@@ -17,5 +17,6 @@ const Envconfig = {
 export default { 
     env,
     mock: true,
+    namespace: 'management',
     ...Envconfig[env]
 }
