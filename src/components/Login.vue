@@ -8,9 +8,15 @@
 
 import Welcome from './Welcome.vue'
 
+
 export default {
   name: 'login',
   components: {Welcome},
+  mounted() {
+    this.$request.get('/login', {name: 'ranen'}).then((res) => {
+        console.log(res)
+    })
+  },
   methods: {
     goHome() {
       this.$router.push('/welcome')
