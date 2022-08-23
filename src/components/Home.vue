@@ -3,7 +3,7 @@
     <div :class="['nav-side', isCollapse ? 'fold' : 'unfold']">
       <!-- logo -->
       <div class="logo">
-        <img src="./../assets/logo.png">
+        <img src="@/assets/logo.png">
         <span v-show="!isCollapse">freeAdmin</span>
       </div>
       <!-- 导航菜单 -->
