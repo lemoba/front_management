@@ -4,34 +4,18 @@
       <!-- logo -->
       <div class="logo">
         <img src="./../assets/logo.png">
-        <span v-show="!isCollapse">FreeAdmin</span>
+        <span v-show="!isCollapse">freeAdmin</span>
       </div>
       <!-- 导航菜单 -->
       <el-menu
-        default-active="2"
+        :default-active="activeMenu"
         class="nav-menu"
         router
         background-color="#001529"
         text-color="#FFF"
         :collapse="isCollapse"
         >
-        <el-sub-menu index="1">
-          <template #title>
-            <el-icon><setting /></el-icon>
-            <span>系统管理</span>
-          </template>  
-            <el-menu-item index="1-1">用户管理</el-menu-item>
-            <el-menu-item index="1-2">菜单管理</el-menu-item>  
-        </el-sub-menu>
-    
-        <el-sub-menu index="2">
-          <template #title>
-            <el-icon><MagicStick /></el-icon>
-            <span>审批管理</span>
-          </template>  
-            <el-menu-item index="2-1">休假申请</el-menu-item>
-            <el-menu-item index="2-2">带我审批</el-menu-item>    
-        </el-sub-menu>
+          <TreeMenu :userMenu="userMenu" />
       </el-menu>
     </div>
     <div :class="['content-right', isCollapse ? 'fold': 'unfold']">
@@ -40,10 +24,12 @@
           <div class="menu-flod" @click="toggle">
             <el-icon color="#409EFC" class="no-inherit"><Fold/></el-icon>
           </div>
-          <div class="bread">面包屑</div>
+          <div class="bread">
+            <BreadCrumb />
+          </div>
         </div>
         <div class="user-info">
-          <el-badge :is-dot="noticeCount" class="notice">
+          <el-badge :is-dot="noticeCount > 0 ? true : false" class="notice">
             <el-icon :size="20">
               <Bell />
             </el-icon>
@@ -74,48 +60,55 @@
 </template>
 
 <script>
- export default {
-    data() {
-      return {
-        isCollapse: false,
-        noticeCount: 0,
-        userInfo: {
-          username: '',
-          nickname: ''
-        },
-        userMenu: []
-      }
-    },
-    mounted() {
-      this.getNoticeCount()
-      this.getUserInfo() 
-    },
-    methods: {
-      toggle() {
-        this.isCollapse = !this.isCollapse
-        console.log(this.userMenu)
-      },
 
-      handleLogout(key) {
-        if (key == 'email') return;
-        this.$store.commit('saveUserInfo', '');
-        this.userInfo = ''
-        this.$store.commit('saveAccessToken', '');
-        this.$router.push('/login')
+import TreeMenu from './TreeMenu.vue'
+import BreadCrumb from './BreadCrumb.vue';
+
+export default {
+  name: 'Home',
+  components: { TreeMenu, BreadCrumb },
+  data() {
+    return {
+      isCollapse: false,
+      noticeCount: 0,
+      userInfo: {
+          username: "",
+          nickname: ""
       },
-      getNoticeCount() {
-        this.noticeCount = 12
-      },
-      async getUserInfo() {
-        const res = await this.$api.me()
+      activeMenu: location.hash.slice(1),
+      userMenu: []
+    };
+  },
+  mounted() {
+    this.getNoticeCount();
+    this.getUserInfo();
+  },
+  methods: {
+    toggle() {
+        this.isCollapse = !this.isCollapse;
+        console.log(this.userMenu);
+    },
+    handleLogout(key) {
+        if (key == "email")
+            return;
+        this.$store.commit("saveUserInfo", "");
+        this.userInfo = "";
+        this.$store.commit("saveAccessToken", "");
+        this.$router.push("/login");
+    },
+    getNoticeCount() {
+        this.noticeCount = 12;
+    },
+    async getUserInfo() {
+        const res = await this.$api.me();
         this.userInfo = {
             username: res.username,
             nickname: res.nickname
-        }
-        this.userMenu = res.menu
-      }
-    },
- }
+        };
+        this.userMenu = res.menu;
+    }
+  }
+}
 </script>
 
 <style lang="scss">
