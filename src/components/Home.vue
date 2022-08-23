@@ -1,10 +1,10 @@
 <template>
   <div class="basic-layout">
-    <div class="nav-side">
+    <div :class="['nav-side', isCollapse ? 'fold' : 'unfold']">
       <!-- logo -->
       <div class="logo">
         <img src="./../assets/logo.png">
-        <span>FreeAdmin</span>
+        <span v-show="!isCollapse">FreeAdmin</span>
       </div>
       <!-- 导航菜单 -->
       <el-menu
@@ -13,7 +13,7 @@
         router
         background-color="#001529"
         text-color="#FFF"
-        :collapse="false"
+        :collapse="isCollapse"
         >
         <el-sub-menu index="1">
           <template #title>
@@ -34,16 +34,16 @@
         </el-sub-menu>
       </el-menu>
     </div>
-    <div class="content-right">
+    <div :class="['content-right', isCollapse ? 'fold': 'unfold']">
       <div class="nav-top">
         <div class="nav-left">
-          <div class="menu-flod">
-            <el-icon color="#409EFC" class="no-inherit"><Fold /></el-icon>
+          <div class="menu-flod" @click="toggle">
+            <el-icon color="#409EFC" class="no-inherit"><Fold/></el-icon>
           </div>
           <div class="bread">面包屑</div>
         </div>
         <div class="user-info">
-          <el-badge :is-dot="true" class="notice">
+          <el-badge :is-dot="noticeCount" class="notice">
             <el-icon :size="20">
               <Bell />
             </el-icon>
@@ -74,26 +74,45 @@
 </template>
 
 <script>
-import storage from './../utils/storage'
-
  export default {
     data() {
       return {
+        isCollapse: false,
+        noticeCount: 0,
         userInfo: {
-          username: 'lemoba@qq.com',
-          nickname: 'lemoba'
-        }
+          username: '',
+          nickname: ''
+        },
+        userMenu: []
       }
     },
     mounted() {
-      this.$api.me().then((res) => {
-        this.$store.commit('saveUserInfo', res)
-      })
+      this.getNoticeCount()
+      this.getUserInfo() 
     },
     methods: {
+      toggle() {
+        this.isCollapse = !this.isCollapse
+        console.log(this.userMenu)
+      },
+
       handleLogout(key) {
         if (key == 'email') return;
         this.$store.commit('saveUserInfo', '');
+        this.userInfo = ''
+        this.$store.commit('saveAccessToken', '');
+        this.$router.push('/login')
+      },
+      getNoticeCount() {
+        this.noticeCount = 12
+      },
+      async getUserInfo() {
+        const res = await this.$api.me()
+        this.userInfo = {
+            username: res.username,
+            nickname: res.nickname
+        }
+        this.userMenu = res.menu
       }
     },
  }
@@ -108,7 +127,6 @@ import storage from './../utils/storage'
     height:100vh;
     background-color: #001529;
     color: #fff;
-    overflow-y: auto;
     transition: width .5s;
     .logo {
       cursor: pointer;
@@ -125,6 +143,15 @@ import storage from './../utils/storage'
     .nav-menu {
       height: calc(100vh - 50px);
       border-right: none;
+    }
+    // 侧边栏展开
+    &.fold {
+      width: 64px;
+    }
+
+    // 侧边栏合并
+    &.unfold {
+      width: 200px;
     }
   }
   .content-right{
@@ -149,6 +176,12 @@ import storage from './../utils/storage'
         cursor: pointer;
         .notice {
           line-height: 30px;
+          margin-right: 15px;
+        }
+        .user-link {
+           height: 40px;
+           line-height: 40px;
+           color: #409eff;
         }
       }
     }
@@ -160,6 +193,15 @@ import storage from './../utils/storage'
         background: #ffffff;
         height: 100%
       } 
+    }
+    // 侧边栏展开
+    &.fold {
+     margin-left: 64px
+    }
+
+    // 侧边栏合并
+    &.unfold {
+      margin-left: 200px;
     } 
   }
 } 
