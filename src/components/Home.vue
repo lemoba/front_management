@@ -50,10 +50,8 @@
           </el-dropdown>
         </div>
       </div>
-      <div class="wrapper">
-        <div class="main-page">
-          <router-view></router-view>
-        </div>  
+      <div class="wrapper">      
+        <router-view></router-view>    
       </div>
     </div>
   </div>   
@@ -80,8 +78,8 @@ export default {
     };
   },
   mounted() {
-    this.getNoticeCount();
-    this.getUserInfo();
+    // this.getNoticeCount();
+    // this.getUserInfo();
   },
   methods: {
     toggle() {
