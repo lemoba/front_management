@@ -1,14 +1,14 @@
 <template>
     <div class="user-manager">
         <div class="query-form">
-            <el-form :inline="true" :model="user">
-                <el-form-item>
+            <el-form ref="formRef" :inline="true" :model="user" >
+                <el-form-item label="用户ID" prop="userId">
                     <el-input v-model="user.userId" placeholder="请输入用户ID"/>
                 </el-form-item>
-                <el-form-item>
+                <el-form-item label="用户名称" prop="userName">
                     <el-input v-model="user.userName" placeholder="请输入用户名称"/>
                 </el-form-item>
-                <el-form-item>
+                <el-form-item label="在职状态" prop="state">
                     <el-select v-model="user.state">
                         <el-option label="所有" :value="0"></el-option>
                         <el-option label="在职" :value="1"></el-option>
@@ -17,8 +17,8 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary">查询</el-button>
-                    <el-button>重置</el-button>
+                    <el-button type="primary" @click="handleQuery">查询</el-button>
+                    <el-button @click="handleReset">重置</el-button>
                 </el-form-item>
             </el-form>
         </div>
@@ -50,17 +50,21 @@
                     </template>
                 </el-table-column>
             </el-table>
+            <el-pagination class="pagination" background layout="prev, pager, next" :total="pager.total" />
         </div>
     </div>
 </template>
   
 <script>
-import { getCurrentInstance, onMounted, reactive, ref } from 'vue';
-export default {
+import { getCurrentInstance, onMounted, reactive, ref, defineComponent} from 'vue';
+export default defineComponent ({
     name: 'user',
     setup() {
-        const ctx = getCurrentInstance().appContext.config.globalProperties
-        const user = reactive({})
+        const ctx = getCurrentInstance().appContext.config.globalProperties.$api
+        const formRef = ref(null);
+        const user = reactive({
+            state: 0
+        })
         const columns = reactive([
             {
                 label: '用户ID',
@@ -91,7 +95,7 @@ export default {
                 prop: 'lastLoginTime'
             },
         ])
-        const userList = reactive([])
+        const userList = ref([])
         const pager = reactive({
             pageNum: 1,
             pageSize: 10
@@ -101,23 +105,38 @@ export default {
         })
 
         const getUserList = async() => {
+            let params = { ...user, ...pager }
             try {
-                const { list, page} = await ctx.$api.getUserList()
+                const {page, list} = await ctx.getUserList(params)
                 userList.value = list
                 pager.total = page.total
             }catch (e) {
                     //
             }     
         }
+
+        // 搜索
+        const handleQuery = () => {
+            getUserList()
+        }
+
+        // 重置
+        const handleReset = () => {
+            formRef.value.resetFields()
+        }
+
         return {
             user,
             userList,
             columns,
             getUserList,
-            pager
+            pager,
+            formRef,
+            handleQuery,
+            handleReset
         }
     }
-}
+})
 </script>
 
 <style lang="scss">

@@ -76,7 +76,8 @@ a{
     border-bottom: 1px solid #ece8e8;
   }
   .pagination {
-    text-align: right;
     padding: 10px;
+    display: flex;
+    justify-content: end;
   }
 }
