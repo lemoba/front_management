@@ -30,6 +30,7 @@ export default{
             mock: true
         })    
     },
+
     // 用户列表
     getUserList(params) {
         return request({
@@ -38,5 +39,15 @@ export default{
             data: params,
             mock: true
         })    
+    },
+
+    // 用户删除
+    userDelete(params) {
+        return request({
+            url: '/users/delete',
+            method: 'POST',
+            data: params,
+            mock: true
+        })
     }
 }
