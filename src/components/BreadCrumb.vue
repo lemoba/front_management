@@ -1,19 +1,19 @@
 <template>
-  <el-breadcrumb :separator-icon="ArrowRight">
-    <el-breadcrumb-item v-for="item in breadList" :key="item.path"> {{ item.meta.title }}</el-breadcrumb-item>
+  <el-breadcrumb separator-icon="ArrowRight">
+    <el-breadcrumb-item v-for="item in breadList" :key="item.path">
+      <router-link to="/welcom" v-if="index==0">{{ item.meta.title }}</router-link>
+      <span v-else> {{ item.meta.title }}</span>
+    </el-breadcrumb-item>
   </el-breadcrumb>
 </template>
 
 <script>
 export default{
     name: 'BreadCrumb',
-    computed: {
+    computed: {  
         breadList() {
-            return this.$router.matched
+            return this.$route.matched;
         }
-    },
-    mounted() {
-        console.log("router=>", this.$route)
     }
 }
 </script>

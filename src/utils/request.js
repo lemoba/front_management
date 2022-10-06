@@ -2,9 +2,9 @@
  * axios封装
  */
 import axios from "axios";
-import config from "./../config"
+import config from "@/config"
 import { ElMessage } from "element-plus"
-import router from './../router'
+import router from '@/router'
 import storage from './storage'
 
 const TOKEN_INVALID = "token验证错误"
