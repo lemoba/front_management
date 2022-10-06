@@ -18,7 +18,7 @@
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="handleQuery">查询</el-button>
-                    <el-button @click="handleReset">重置</el-button>
+                    <el-button @click="handleReset('formRef')">重置</el-button>
                 </el-form-item>
             </el-form>
         </div>
@@ -33,15 +33,15 @@
             >
                 <el-table-column type="selection"/>
                 <el-table-column 
-                v-for="(item, index) in columns"
-                :key="index"
+                v-for="item in columns"
+                :key="item.prop"
                 :prop="item.prop" 
                 :label="item.label"
 				:formatter = "item.formatter"
                 align="center"/>
                 <el-table-column label="操作" align="center">
                     <template #default="scope">
-                        <el-button size="small" @click="handleEdit(scope.$index, scope.row)"
+                        <el-button size="small" @click="handleEdit(scope.row)"
                         >编辑</el-button
                         >
                         <el-button
@@ -56,15 +56,20 @@
             <el-pagination class="pagination" background layout="prev, pager, next" :total="pager.total" />
         </div>
 	    <el-dialog title="用户新增" v-model="showModel" width="40%">
-		    <el-form ref="userForm" :model="userForm" label-width="70px" :rules="rules" label-position="left">
+		    <el-form 
+                ref="dialogFormRef"
+                :model="userForm" 
+                label-width="90px" 
+                status-icon
+                :rules="rules" >
 			    <el-form-item label="用户名" prop="userName">
-				    <el-input v-model="userForm.userName" placeholder="请输入用户名"/>
+				    <el-input v-model="userForm.userName" placeholder="请输入用户名" :disabled="action == 'edit'"/>
 			    </el-form-item>
 			    <el-form-item label="邮箱" prop="userEmail">
-				    <el-input v-model="userForm.userEmail" placeholder="请输入邮箱"/>
+				    <el-input v-model="userForm.userEmail" placeholder="请输入邮箱" :disabled="action == 'edit'"/>
 			    </el-form-item>
 			    <el-form-item label="手机号" prop="mobile">
-				    <el-input v-model="userForm.userMobile" placeholder="请输入手机号"/>
+				    <el-input v-model="userForm.mobile" placeholder="请输入手机号"/>
 			    </el-form-item>
 			    <el-form-item label="岗位" prop="job">
 				    <el-input v-model="userForm.job" placeholder="请输入岗位"/>
@@ -78,15 +83,27 @@
 				    </el-select>
 			    </el-form-item>
 			    <el-form-item label="系统角色" prop="roleList">
-				    <el-select v-model="userForm.roleList" placeholder="请选择用户角色">
-					    <el-option></el-option>
+				    <el-select 
+                    v-model="userForm.roleList" 
+                    placeholder="请选择用户角色"
+                    multiple
+                    style="width:100%"
+                    >
+					    <el-option 
+                            v-for="role in roleList" 
+                            :key="role._id" 
+                            :label="role.roleName"
+                            :value='role._id'
+                            >
+                        </el-option>
 				    </el-select>
 			    </el-form-item>
 			    <el-form-item label="部门" prop="depId">
 				    <el-cascader
 					    v-model="userForm.depId"
 					    placeholder="请选择所属部门"
-					    :options="options"
+					    :options="deptList"
+                        style="width:100%"
 					    :props="{
 							 checkStrictly: true,
 							 value: '_id',
@@ -98,8 +115,8 @@
 		    </el-form>
 		    <template #footer>
 				<span class="dialog-footer">
-					<el-button>取消</el-button>
-					<el-button type="primary">确认</el-button>
+                    <el-button @click="handleClose()">取消</el-button>
+					<el-button type="primary" @click="handleSubmit">确认</el-button>
 				</span>
 		    </template>
 	    </el-dialog>
@@ -107,16 +124,17 @@
 </template>
   
 <script>
-import { getCurrentInstance, onMounted, reactive, ref, defineComponent} from 'vue';
+import { getCurrentInstance, onMounted, reactive, ref, defineComponent, toRaw, nextTick} from 'vue';
 import { ElMessage } from 'element-plus'
 export default defineComponent ({
     name: 'user',
     setup() {
-        const ctx = getCurrentInstance().appContext.config.globalProperties.$api
+        const ctx = getCurrentInstance().appContext.config.globalProperties
         const formRef = ref(null);
+        const dialogFormRef = ref(null);
 
 		const userForm = reactive({
-
+            state: 0
 		})
 
         const user = reactive({
@@ -171,6 +189,40 @@ export default defineComponent ({
 	    // 用户列表
         const userList = ref([])
 
+        // 表单验证
+        const rules = reactive({
+            userName: [
+                {
+                    required: true,
+                    message: '请输入用户名',
+                    trigger: 'blur'
+                }
+            ],
+            userEmail: [
+                {
+                    required: true,
+                    message: '请输入邮箱',
+                    trigger: 'blur'
+                }
+            ],
+            roleList: [
+                {
+                    required: true,
+                    message: '请选择用户角色',
+                    trigger: 'blur'
+                }
+            ],
+            depId: [
+                {
+                    required: true,
+                    message: '请选择所在部门',
+                    trigger: 'blur'
+                }
+            ]
+        })
+
+        const action = ref('add')
+
 	    // 分页
         const pager = reactive({
             pageNum: 1,
@@ -182,15 +234,23 @@ export default defineComponent ({
 
 	    // 选择用户列表对象
 	    const checkedUserIds = ref([])
+        
+        // 角色列表
+        const roleList = ref([])
 
+         // 部门列表
+         const deptList = ref([])
+ 
         onMounted(() => {
             getUserList()
+            getDeptList()
+            getRoleList()
         })
 
         const getUserList = async() => {
             let params = { ...user, ...pager }
             try {
-                const {page, list} = await ctx.getUserList(params)
+                const {page, list} = await ctx.$api.getUserList(params)
                 userList.value = list
                 pager.total = page.total
             }catch (e) {
@@ -204,13 +264,17 @@ export default defineComponent ({
         }
 
         // 重置
-        const handleReset = () => {
-            formRef.value.resetFields()
+        const handleReset = (formType) => {
+            if (formType == 'formRef') {
+                formRef.value.resetFields()
+            }else { 
+                dialogFormRef.value.resetFields()
+            }
         }
 
         // 用户删除
         const handleDelete = async (row) => {
-			await ctx.userDelete({
+			await ctx.$api.userDelete({
 				userIds: [row.userId]
 			})
 	        ElMessage.success('删除成功')
@@ -232,7 +296,7 @@ export default defineComponent ({
 			    ElMessage.error('请选择要删除的用户')
 				return
 		    }
-		    const res = await ctx.userDelete({
+		    const res = await ctx.$api.userDelete({
 			    userIds: checkedUserIds.value
 		    })
 
@@ -246,24 +310,78 @@ export default defineComponent ({
 
 		// 用户新增
 	    const handleCreate = () => {
+            action.value = 'add'
 		    showModel.value = true
 	    }
 
+        const getDeptList = async () => {
+            let list = await ctx.$api.getDeptList()
+            deptList.value = list
+        }
+
+        // 角色列表
+        const getRoleList = async () => {
+            let list = await ctx.$api.getRoleList()
+            roleList.value = list
+        }
+        
+        // 用户弹出关闭
+        const handleClose = () => {
+            handleReset('dialogFormRef');
+            showModel.value = false;
+        }
+
+        const handleSubmit = async () => {
+            if (!dialogFormRef) return;
+            dialogFormRef.value.validate(async (valid) => {
+                if (valid) {
+                    let params = toRaw(userForm);
+                    params.userEmail += "@ranen.com"
+                    params.action = 'add'
+                    let res = await ctx.$api.userSubmit(params)
+                    if (res) {
+                        showModel.value = false;
+                        ElMessage.success('添加成功')
+                        handleReset('dialogFormRef')
+                        getUserList()
+                    }
+                }else {
+                    return false
+                }
+            })
+        }
+        // 用户编辑
+        const handleEdit = async (row) => {
+            action.value = 'edit'
+            showModel.value = true
+            await nextTick()
+            Object.assign(userForm, row)
+        }
         return {
             user,
 	        userForm,
+            rules,
             userList,
+            roleList,
+            deptList,
             columns,
             pager,
             formRef,
+            action,
+            dialogFormRef,
 	        showModel,
 	        getUserList,
+            getDeptList,
+            getRoleList,
             handleQuery,
             handleReset,
+            handleEdit,
 	        handleDelete,
 	        handleMulDelete,
 	        handleSelectionChange,
-	        handleCreate
+	        handleCreate,
+            handleClose,
+            handleSubmit
         }
     }
 })

@@ -30,7 +30,24 @@ export default{
             mock: true
         })    
     },
-
+    // 获取角色列表
+    getRoleList() {
+        return request({
+            url: '/roles/allList',
+            method: 'GET',
+            data: {},
+            mock: true
+        })
+    },
+    // 获取部门列表
+    getDeptList() {
+        return request({
+            url: '/dept/list',
+            method: 'GET',
+            data: {},
+            mock: true
+        })
+    },
     // 用户列表
     getUserList(params) {
         return request({
@@ -41,6 +58,15 @@ export default{
         })    
     },
 
+    // 新增用户
+    userSubmit(params) {
+        return request({
+            url: '/users/add',
+            method: 'POST',
+            data: params,
+            mock: true
+        })
+    },
     // 用户删除
     userDelete(params) {
         return request({
