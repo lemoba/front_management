@@ -75,5 +75,14 @@ export default{
             data: params,
             mock: true
         })
+    },
+    // 添加菜单
+    menuSubmit(params) {
+        return request({
+            url: '/menu/add',
+            method: 'POST',
+            data: params,
+            mock: true
+        }) 
     }
 }

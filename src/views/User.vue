@@ -55,12 +55,18 @@
             </el-table>
             <el-pagination class="pagination" background layout="prev, pager, next" :total="pager.total" />
         </div>
-	    <el-dialog title="用户新增" v-model="showModel" width="40%">
+	    <el-dialog 
+            title="用户新增" 
+            v-model="showModel" 
+            width="40%"
+            :show-close="false"
+            >
 		    <el-form 
                 ref="dialogFormRef"
                 :model="userForm" 
                 label-width="90px" 
                 status-icon
+
                 :rules="rules" >
 			    <el-form-item label="用户名" prop="userName">
 				    <el-input v-model="userForm.userName" placeholder="请输入用户名" :disabled="action == 'edit'"/>

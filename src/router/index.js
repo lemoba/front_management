@@ -22,7 +22,7 @@ const routes = [
             },
             {
                 name: 'user',
-                path: 'system/user',
+                path: '/system/user',
                 meta: {
                     'title': '用户管理'
                 },
@@ -30,19 +30,11 @@ const routes = [
             },
             {
                 name: 'menu',
-                path: 'system/menu',
+                path: '/system/menu',
                 meta: {
                     'title': '菜单管理'
                 },
                 component:() => import('@/views/Menu.vue'),
-            },
-            {
-                name: 'user',
-                path: 'user',
-                meta: {
-                    'title': '用户管理'
-                },
-                component:() => import('./../views/User.vue')
             },
         ]
     },
