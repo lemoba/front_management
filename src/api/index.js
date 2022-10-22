@@ -51,10 +51,9 @@ export default{
     // 用户列表
     getUserList(params) {
         return request({
-            url: '/users/list',
+            url: 'admin/users',
             method: 'GET',
             data: params,
-            mock: true
         })    
     },
 

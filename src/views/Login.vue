@@ -24,7 +24,7 @@ export default {
   data() {
     return {
       user: {
-        username: "lemoba@qq.com",
+        username: "ranen@qq.com",
         password: "123456"
       },
       rules: {

@@ -79,7 +79,7 @@ export default {
   },
   mounted() {
     // this.getNoticeCount();
-    // this.getUserInfo();
+    this.getUserInfo();
   },
   methods: {
     toggle() {
@@ -103,7 +103,7 @@ export default {
             username: res.username,
             nickname: res.nickname
         };
-        this.userMenu = res.menu;
+        this.userMenu = res.rules;
     }
   }
 }

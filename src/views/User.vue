@@ -38,7 +38,8 @@
                 :prop="item.prop" 
                 :label="item.label"
 				:formatter = "item.formatter"
-                align="center"/>
+                align="center">
+                </el-table-column>
                 <el-table-column label="操作" align="center">
                     <template #default="scope">
                         <el-button size="small" @click="handleEdit(scope.row)"
@@ -66,7 +67,6 @@
                 :model="userForm" 
                 label-width="90px" 
                 status-icon
-
                 :rules="rules" >
 			    <el-form-item label="用户名" prop="userName">
 				    <el-input v-model="userForm.userName" placeholder="请输入用户名" :disabled="action == 'edit'"/>
@@ -132,6 +132,8 @@
 <script>
 import { getCurrentInstance, onMounted, reactive, ref, defineComponent, toRaw, nextTick} from 'vue';
 import { ElMessage } from 'element-plus'
+import formatDate from '@/utils/time'
+
 export default defineComponent ({
     name: 'user',
     setup() {
@@ -151,44 +153,45 @@ export default defineComponent ({
         const columns = reactive([
             {
                 label: '用户ID',
-                prop: 'userId'
+                prop: 'id'
             },
             {
                 label: '用户名称',
-                prop: 'userName'
+                prop: 'nickname'
             },
             {
                 label: '用户邮箱',
-                prop: 'userEmail'
+                prop: 'username'
             },
             {
                 label: '用户角色',
-                prop: 'role',
-	            formatter(row, column, value) {
-					return {
-						0: '管理员',
-						1: '普通用户'
-					}[value]
-	            }
+                prop: 'roles',
+                formatter: (row, column, value) => {
+                    var count = value.length
+                    if (count === 0) {
+                        return '/'
+                    }
+                    return count > 1 ? value[0]?.name + '等' + count + '个角色' : value[0]?.name
+                }
             },
             {
-                label: '用户状态',
-                prop: 'state',
-	            formatter(row, column, value) {
-		            return {
-			            1: '在职',
-			            2: '离职',
-			            3: '试用期'
-		            }[value]
-	            }
+                label: '所属部门',
+                prop: 'department'
             },
             {
                 label: '注册时间',
-                prop: 'createTime'
+                prop: 'created_at',
+                formatter: (row, column, value) => {
+                    return formatDate(value)
+                }
             },
             {
+                label: '最后登录IP',
+                prop: 'last_login_ip'
+            },        
+            {
                 label: '最后登录时间',
-                prop: 'lastLoginTime'
+                prop: 'last_login_time',
             },
         ])
 
