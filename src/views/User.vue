@@ -2,14 +2,15 @@
     <div class="user-manager">
         <div class="query-form">
             <el-form ref="formRef" :inline="true" :model="user" >
-                <el-form-item label="用户ID" prop="userId">
-                    <el-input v-model="user.userId" placeholder="请输入用户ID"/>
+                <el-form-item label="用户名称" prop="nickname">
+                    <el-input v-model="user.nickname" placeholder="请输入用户名称"/>
                 </el-form-item>
-                <el-form-item label="用户名称" prop="userName">
-                    <el-input v-model="user.userName" placeholder="请输入用户名称"/>
+                <el-form-item label="用户邮箱" prop="email">
+                    <el-input v-model="user.email" placeholder="请输入用户邮箱"/>
                 </el-form-item>
-                <el-form-item label="在职状态" prop="state">
-                    <el-select v-model="user.state">
+             
+                <el-form-item label="所在部门" prop="department_id">
+                    <el-select v-model="user.department_id">
                         <el-option label="所有" :value="0"></el-option>
                         <el-option label="在职" :value="1"></el-option>
                         <el-option label="离职" :value="2"></el-option>
@@ -25,13 +26,14 @@
         <div class="base-table">
             <div class="action">
                 <el-button type="primary" @click="handleCreate">新增</el-button>
-                <el-button type="danger" @click="handleMulDelete">批量删除</el-button>
+                <!-- <el-button type="danger" @click="handleMulDelete">批量删除</el-button> -->
             </div>
             <el-table
 	            :data="userList"
 	            @selection-change="handleSelectionChange"
             >
-                <el-table-column type="selection"/>
+            <!-- <el-table-column type="selection"/> -->
+                <!-- <el-table-column/> -->
                 <el-table-column 
                 v-for="item in columns"
                 :key="item.prop"
@@ -57,7 +59,7 @@
             <el-pagination class="pagination" background layout="prev, pager, next" :total="pager.total" />
         </div>
 	    <el-dialog 
-            title="用户新增" 
+            :title="dialogTitle" 
             v-model="showModel" 
             width="40%"
             :show-close="false"
@@ -68,25 +70,14 @@
                 label-width="90px" 
                 status-icon
                 :rules="rules" >
-			    <el-form-item label="用户名" prop="userName">
-				    <el-input v-model="userForm.userName" placeholder="请输入用户名" :disabled="action == 'edit'"/>
+			    <el-form-item label="用户名" prop="nickname">
+				    <el-input v-model="userForm.nickname" placeholder="请输入用户名" :disabled="action == 'edit'"/>
 			    </el-form-item>
-			    <el-form-item label="邮箱" prop="userEmail">
-				    <el-input v-model="userForm.userEmail" placeholder="请输入邮箱" :disabled="action == 'edit'"/>
+			    <el-form-item label="邮箱" prop="username">
+				    <el-input v-model="userForm.username" placeholder="请输入邮箱" :disabled="action == 'edit'"/>
 			    </el-form-item>
-			    <el-form-item label="手机号" prop="mobile">
-				    <el-input v-model="userForm.mobile" placeholder="请输入手机号"/>
-			    </el-form-item>
-			    <el-form-item label="岗位" prop="job">
-				    <el-input v-model="userForm.job" placeholder="请输入岗位"/>
-			    </el-form-item>
-			    <el-form-item label="状态" prop="state">
-				    <el-select v-model="userForm.state" placeholder="请选择用户状态">
-					    <el-option label="所有" :value="0"></el-option>
-					    <el-option label="在职" :value="1"></el-option>
-					    <el-option label="离职" :value="2"></el-option>
-					    <el-option label="试用期" :value="3"></el-option>
-				    </el-select>
+                <el-form-item label="密码" prop="password">
+				    <el-input v-model="userForm.password" placeholder="请输入密码" :disabled="action == 'edit'"/>
 			    </el-form-item>
 			    <el-form-item label="系统角色" prop="roleList">
 				    <el-select 
@@ -97,23 +88,23 @@
                     >
 					    <el-option 
                             v-for="role in roleList" 
-                            :key="role._id" 
-                            :label="role.roleName"
-                            :value='role._id'
+                            :key="role.id" 
+                            :label="role.name"
+                            :value='role.id'
                             >
                         </el-option>
 				    </el-select>
 			    </el-form-item>
-			    <el-form-item label="部门" prop="depId">
+			    <el-form-item label="部门" prop="department_id">
 				    <el-cascader
-					    v-model="userForm.depId"
+					    v-model="userForm.department_id"
 					    placeholder="请选择所属部门"
 					    :options="deptList"
                         style="width:100%"
 					    :props="{
 							 checkStrictly: true,
-							 value: '_id',
-							 label: 'deptName'
+							 value: 'id',
+							 label: 'name'
 					    }"
 					    clearable
 				    />
@@ -141,20 +132,18 @@ export default defineComponent ({
         const formRef = ref(null);
         const dialogFormRef = ref(null);
 
+        const dialogTitle = ref(null);
+
 		const userForm = reactive({
-            state: 0
+           
 		})
 
         const user = reactive({
-            state: 0
+        
         })
 
 	    // 表格字段
         const columns = reactive([
-            {
-                label: '用户ID',
-                prop: 'id'
-            },
             {
                 label: '用户名称',
                 prop: 'nickname'
@@ -200,17 +189,24 @@ export default defineComponent ({
 
         // 表单验证
         const rules = reactive({
-            userName: [
+            username: [
+                {
+                    required: true,
+                    message: '请输入邮箱',
+                    trigger: 'blur'
+                }
+            ],
+            nickname: [
                 {
                     required: true,
                     message: '请输入用户名',
                     trigger: 'blur'
                 }
             ],
-            userEmail: [
+            password: [
                 {
                     required: true,
-                    message: '请输入邮箱',
+                    message: '请输入密码',
                     trigger: 'blur'
                 }
             ],
@@ -247,8 +243,8 @@ export default defineComponent ({
         // 角色列表
         const roleList = ref([])
 
-         // 部门列表
-         const deptList = ref([])
+        // 部门列表
+        const deptList = ref([])
  
         onMounted(() => {
             getUserList()
@@ -283,9 +279,7 @@ export default defineComponent ({
 
         // 用户删除
         const handleDelete = async (row) => {
-			await ctx.$api.userDelete({
-				userIds: [row.userId]
-			})
+			await ctx.$api.userDelete(row.id)
 	        ElMessage.success('删除成功')
 	        getUserList()
         }
@@ -308,7 +302,6 @@ export default defineComponent ({
 		    const res = await ctx.$api.userDelete({
 			    userIds: checkedUserIds.value
 		    })
-
 		    if (res.nModified > 0) {
 			    ElMessage.success('删除成功')
 			    getUserList()
@@ -320,6 +313,7 @@ export default defineComponent ({
 		// 用户新增
 	    const handleCreate = () => {
             action.value = 'add'
+            dialogTitle.value = '新增用户'
 		    showModel.value = true
 	    }
 
@@ -345,15 +339,13 @@ export default defineComponent ({
             dialogFormRef.value.validate(async (valid) => {
                 if (valid) {
                     let params = toRaw(userForm);
-                    params.userEmail += "@ranen.com"
+                    params.department_id = params.department_id[params.department_id.length - 1]
                     params.action = 'add'
-                    let res = await ctx.$api.userSubmit(params)
-                    if (res) {
-                        showModel.value = false;
-                        ElMessage.success('添加成功')
-                        handleReset('dialogFormRef')
-                        getUserList()
-                    }
+                    await ctx.$api.userSubmit(params)              
+                    showModel.value = false;
+                    ElMessage.success('添加成功')
+                    handleReset('dialogFormRef')
+                    getUserList()                 
                 }else {
                     return false
                 }
@@ -362,6 +354,7 @@ export default defineComponent ({
         // 用户编辑
         const handleEdit = async (row) => {
             action.value = 'edit'
+            dialogTitle.value = '编辑用户'
             showModel.value = true
             await nextTick()
             Object.assign(userForm, row)
@@ -378,6 +371,7 @@ export default defineComponent ({
             formRef,
             action,
             dialogFormRef,
+            dialogTitle,
 	        showModel,
 	        getUserList,
             getDeptList,

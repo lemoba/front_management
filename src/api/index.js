@@ -33,19 +33,17 @@ export default{
     // 获取角色列表
     getRoleList() {
         return request({
-            url: '/roles/allList',
+            url: '/admin/all_role',
             method: 'GET',
             data: {},
-            mock: true
         })
     },
     // 获取部门列表
     getDeptList() {
         return request({
-            url: '/dept/list',
+            url: '/admin/all_department',
             method: 'GET',
             data: {},
-            mock: true
         })
     },
     // 用户列表
@@ -60,19 +58,16 @@ export default{
     // 新增用户
     userSubmit(params) {
         return request({
-            url: '/users/add',
+            url: 'admin/users',
             method: 'POST',
             data: params,
-            mock: true
         })
     },
     // 用户删除
     userDelete(params) {
         return request({
-            url: '/users/delete',
-            method: 'POST',
-            data: params,
-            mock: true
+            url: 'admin/users/' + params,
+            method: 'DELETE',
         })
     },
     // 添加菜单
