@@ -8,11 +8,13 @@ import request from './utils/request'
 import storage from './utils/storage'
 import api from './api'
 import store from './store'
+import moment from 'moment'
 
 const app = createApp(App)
 app.config.globalProperties.$request = request
 app.config.globalProperties.$storage = storage
 app.config.globalProperties.$api = api
+app.config.globalProperties.$moment = moment
 
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 

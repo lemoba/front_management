@@ -12,18 +12,18 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="getMenuList">查询</el-button>
+          <el-button type="primary" @click="handleQuery">查询</el-button>
           <el-button @click="handleReset('form')">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="base-table">
       <div class="action">
-        <el-button type="primary" @click="handleAdd(1)">新增</el-button>
+        <el-button type="primary" @click="handleAdd(1)">创建</el-button>
       </div>
       <el-table
         :data="menuList"
-        row-key="id"
+        row-key="_id"
         :tree-props="{ children: 'children' }"
       >
         <el-table-column
@@ -35,14 +35,17 @@
           :formatter="item.formatter"
         >
         </el-table-column>
-        <el-table-column label="操作" >
+        <el-table-column label="操作" width="200" align="center">
           <template #default="scope">
-            <el-button @click="handleEdit(scope.row)" size="mini"
+            <el-button type="primary" @click="handleAdd(2, scope.row)" size="small"
+              >新增</el-button
+            >
+            <el-button @click="handleEdit(scope.row)" size="small"
               >编辑</el-button
             >
             <el-button
               type="danger"
-              size="mini"
+              size="small"
               @click="handleDel(scope.row._id)"
               >删除</el-button
             >
@@ -50,7 +53,7 @@
         </el-table-column>
       </el-table>
     </div>
-    <el-dialog title="用户新增" v-model="showModal">
+    <el-dialog title="创建菜单" v-model="showModal"  :show-close="false">
       <el-form
         ref="dialogForm"
         :model="menuForm"
@@ -80,7 +83,7 @@
           prop="icon"
           v-show="menuForm.menuType == 1"
         >
-          <el-input v-model="menuForm.icon" placeholder="请输入岗位" />
+          <el-input v-model="menuForm.icon" placeholder="请输入菜单图标" />
         </el-form-item>
         <el-form-item
           label="路由地址"
@@ -130,127 +133,140 @@ export default {
   data() {
     return {
       queryForm: {
-        status: 1,
+
       },
+      menuForm: {
+        menuType: 1,
+        menuState: 1
+      },
+      showModal: false,
       menuList: [],
+      action: '',
       columns: [
         {
-          label: "菜单名称",
-          prop: "name",
-          width: 150,
+          label: '菜单名称',
+          prop: 'menuName',
+          width: 180,
         },
         {
-          label: "图标",
-          prop: "icon",
+          label: '图标',
+          prop: 'icon',
         },
         {
-          label: "路由地址",
-          prop: "path",
-        },
-        {
-          label: "组件路径",
-          prop: "component",
-        },
-        {
-          label: "排序",
-          prop: "priority",
-        },
-        {
-          label: "菜单状态",
-          prop: "status",
-          width: 90,
+          label: '菜单类型',
+          prop: 'menuType',
           formatter(row, column, value) {
             return {
-              1: "正常",
-              2: "停用",
-            }[value];
-          },
+              '1': '菜单',
+              '2': '按钮'
+            }[value]
+          }
         },
+        {
+          label: '权限标识',
+          prop: 'menuCode',
+        },
+        {
+          label: '路由地址',
+          prop: 'path',
+        },
+        {
+          label: '组件路径',
+          prop: 'component',
+        },
+        {
+          label: '菜单状态',
+          prop: 'menuState',
+          formatter(row, column, value) {
+            return {
+              '1': '正常',
+              '2': '停用'
+            }[value]
+          }
+        },
+        {
+          label: '创建时间',
+          prop: 'createTime',
+        }
       ],
-      showModal: false,
-      menuForm: {
-        parentId: [null],
-        menuType: 1,
-        menuState: 1,
-      },
-      action: "",
       rules: {
-        menuName: [
+        menuName:[
           {
             required: true,
-            message: "请输入菜单名称",
-            trigger: "blur",
+            message: '请输入菜单名称',
+            trigger: 'blur'
           },
           {
             min: 2,
             max: 10,
-            message: "长度在2-8个字符",
-            trigger: "blur",
-          },
-        ],
-      },
-    };
+            message: '菜单名称长度有误',
+            trigger: 'blur'
+          }
+        ]
+      }
+    }
   },
   mounted() {
     this.getMenuList();
   },
   methods: {
-    // 菜单列表初始化
-    async getMenuList() {
+    async getMenuList () {
       try {
-        let list = await this.$api.getMenuList(this.queryForm);
+        let list = await this.$api.getMenuList(this.queryForm)
         this.menuList = list;
-      } catch (e) {
-        throw new Error(e);
-      }
+      }catch (e) {
+        // error logs
+        throw new Error(e.message)
+      } 
     },
-    // 表单重置
+    handleQuery() {
+
+    },
     handleReset(form) {
       this.$refs[form].resetFields();
+      //this.showModal = false;
     },
-    // 新增菜单
     handleAdd(type, row) {
       this.showModal = true;
-      this.action = "add";
+      this.action = 'add';
+
       if (type == 2) {
-        this.menuForm.parentId = [...row.parentId, row._id].filter(
+        this.menuForm.parentId = [...row.parentId, row._id].filter(   
           (item) => item
         );
       }
     },
     handleEdit(row) {
       this.showModal = true;
-      this.action = "edit";
+      this.action = 'edit'
       this.$nextTick(() => {
-        Object.assign(this.menuForm, row);
-      });
+        Object.assign(this.menuForm, row)
+      })
     },
-    async handleDel(_id) {
-      await this.$api.menuSubmit({ _id, action: "delete" });
-      this.$message.success("删除成功");
-      this.getMenuList();
+    handleDel() {
+
     },
-    // 菜单操作-提交
+    handleClose() {
+      this.showModal = false;
+      this.handleReset('dialogForm')
+    },
     handleSubmit() {
       this.$refs.dialogForm.validate(async (valid) => {
         if (valid) {
           let { action, menuForm } = this;
-          let params = { ...menuForm, action };
+          let params = {...menuForm, action}
           let res = await this.$api.menuSubmit(params);
           this.showModal = false;
-          this.$message.success("操作成功");
-          this.handleReset("dialogForm");
-          this.getMenuList();
-        }
-      });
-    },
-    // 弹框关闭
-    handleClose() {
-      this.showModal = false;
-      this.handleReset("dialogForm");
-    },
-  },
-};
+          this.$message.success('添加成功')
+          this.handleReset('dialogForm')
+          this.getMenuList()
+        }else {
+          return false
+        }    
+      })
+    }
+  }
+}
 </script>
 
 <style lang="scss">

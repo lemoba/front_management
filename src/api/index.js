@@ -21,22 +21,62 @@ export default{
             method: 'GET',
         })
     },
-
-    // 获取用户列表
-    getUserList(params) {
-        return request ({
-            url: '/admin/users',
-            method: 'GET',
-            data: params
-        })
-    },
-
     // 获取菜单列表
-    getMenuList(params) {
-        return request ({
-            url: '/admin/all_permission',
+    getMenuList() {
+        return request({
+            url: '/menu/list',
             method: 'GET',
-            data: params
+            data: {},
+            mock: true
+        })    
+    },
+    // 获取角色列表
+    getRoleList() {
+        return request({
+            url: '/admin/all_role',
+            method: 'GET',
+            data: {},
         })
     },
+    // 获取部门列表
+    getDeptList() {
+        return request({
+            url: '/admin/all_department',
+            method: 'GET',
+            data: {},
+        })
+    },
+    // 用户列表
+    getUserList(params) {
+        return request({
+            url: 'admin/users',
+            method: 'GET',
+            data: params,
+        })    
+    },
+
+    // 新增用户
+    userSubmit(params) {
+        return request({
+            url: 'admin/users',
+            method: 'POST',
+            data: params,
+        })
+    },
+    // 用户删除
+    userDelete(params) {
+        return request({
+            url: 'admin/users/' + params,
+            method: 'DELETE',
+        })
+    },
+    // 添加菜单
+    menuSubmit(params) {
+        return request({
+            url: '/menu/add',
+            method: 'POST',
+            data: params,
+            mock: true
+        }) 
+    }
 }

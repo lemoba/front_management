@@ -50,10 +50,8 @@
           </el-dropdown>
         </div>
       </div>
-      <div class="wrapper">
-        <div class="main-page">
-          <router-view></router-view>
-        </div>  
+      <div class="wrapper">      
+        <router-view></router-view>    
       </div>
     </div>
   </div>   
@@ -80,7 +78,7 @@ export default {
     };
   },
   mounted() {
-    this.getNoticeCount();
+    // this.getNoticeCount();
     this.getUserInfo();
   },
   methods: {
@@ -105,7 +103,7 @@ export default {
             username: res.username,
             nickname: res.nickname
         };
-        this.userMenu = res.menu;
+        this.userMenu = res.rules;
     }
   }
 }
